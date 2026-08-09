@@ -9,11 +9,14 @@
   <style>
     :root {
       color-scheme: dark;
-      --panel: rgba(8, 11, 16, 0.96);
+      --panel: rgba(8, 11, 16, 0.94);
+      --panel-soft: rgba(12, 17, 24, 0.88);
       --border: rgba(255, 255, 255, 0.13);
       --text: #f4f7fa;
-      --muted: #b8c0ca;
+      --muted: #aeb9c6;
       --accent: #8fc8ff;
+      --cyan: #25d3d8;
+      --gold: #ffd166;
       --button: rgba(255, 255, 255, 0.07);
       --button-hover: rgba(255, 255, 255, 0.13);
     }
@@ -45,7 +48,8 @@
       padding: 15px 20px;
       background: var(--panel);
       border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .titleBlock { min-width: 0; }
@@ -74,16 +78,16 @@
     .viewButton {
       appearance: none;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 9px 13px;
+      border-radius: 11px;
+      padding: 10px 14px;
       background: var(--button);
       color: var(--text);
       font: inherit;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 650;
       white-space: nowrap;
       cursor: pointer;
-      transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+      transition: background 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
     }
 
     .viewButton:hover,
@@ -95,11 +99,10 @@
     .viewButton.active {
       color: var(--accent);
       border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px rgba(143, 200, 255, 0.08), 0 0 20px rgba(78, 153, 230, 0.08);
     }
 
-    #panelHandle {
-      display: none;
-    }
+    #panelHandle { display: none; }
 
     #viewer {
       position: relative;
@@ -117,12 +120,80 @@
       max-width: min(680px, calc(100% - 32px));
       padding: 10px 12px;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 11px;
       background: var(--panel);
       color: var(--muted);
       font-size: 13px;
       line-height: 1.4;
       pointer-events: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    #measurementPanel {
+      position: absolute;
+      z-index: 4;
+      right: 18px;
+      bottom: 18px;
+      width: min(300px, calc(100% - 36px));
+      padding: 12px 13px;
+      border: 1px solid rgba(143, 200, 255, 0.22);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(16, 22, 31, 0.92), rgba(7, 10, 15, 0.90));
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    #measurementPanel.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .measureEyebrow {
+      margin-bottom: 7px;
+      color: var(--accent);
+      font-size: 10px;
+      line-height: 1;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .measureTitle {
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .measureRow {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 5px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .measureRow strong {
+      color: var(--text);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .measureNote {
+      margin-top: 7px;
+      color: #82909f;
+      font-size: 10px;
+      line-height: 1.35;
     }
 
     @media (max-width: 900px) {
@@ -149,7 +220,7 @@
         align-items: stretch;
         gap: 9px;
         padding: calc(9px + env(safe-area-inset-top)) 11px 31px;
-        border-radius: 0 0 15px 15px;
+        border-radius: 0 0 16px 16px;
         box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
         transform: translateY(0);
         transition: transform 220ms ease;
@@ -166,14 +237,12 @@
 
       .subtitle { display: none; }
 
-      .controls {
-        gap: 7px;
-      }
+      .controls { gap: 7px; }
 
       .viewButton {
         flex: 1 1 0;
-        padding: 8px 8px;
-        border-radius: 9px;
+        padding: 9px 8px;
+        border-radius: 10px;
         font-size: 13px;
       }
 
@@ -209,6 +278,18 @@
         bottom: calc(12px + env(safe-area-inset-bottom));
         max-width: none;
       }
+
+      #measurementPanel {
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        width: min(270px, calc(100% - 24px));
+        padding: 10px 11px;
+        border-radius: 12px;
+      }
+
+      .measureTitle { font-size: 13px; }
+      .measureRow { font-size: 11px; }
+      .measureNote { font-size: 9px; }
     }
   </style>
 </head>
@@ -216,7 +297,7 @@
   <header id="infoPanel">
     <div class="titleBlock">
       <h1>Interactive Guanosine-Capped Four-Helix Bundle with Heme Cofactor</h1>
-      <div class="subtitle">Four α-helical peptides, a guanosine-based cap, and a central heme cofactor. Drag to rotate. Scroll or pinch to zoom.</div>
+      <div class="subtitle">Atomic-detail chemistry and a labeled secondary-structure view with axial heme geometry. Drag to rotate. Scroll or pinch to zoom.</div>
     </div>
 
     <div class="controls" aria-label="Molecular representation controls">
@@ -229,6 +310,7 @@
 
   <main id="viewer" aria-label="Interactive 3D molecular viewer">
     <div id="status">Loading interactive molecular model…</div>
+    <aside id="measurementPanel" aria-live="polite"></aside>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/ngl@2.4.0/dist/ngl.js"></script>
@@ -236,20 +318,146 @@
     const stage = new NGL.Stage('viewer', {
       backgroundColor: 'black',
       tooltip: true,
-      cameraType: 'orthographic'
+      cameraType: 'orthographic',
+      quality: 'high'
     });
 
     const statusEl = document.getElementById('status');
+    const measurementPanel = document.getElementById('measurementPanel');
     const atomicBtn = document.getElementById('atomicBtn');
     const secondaryBtn = document.getElementById('secondaryBtn');
     const infoPanel = document.getElementById('infoPanel');
     const panelHandle = document.getElementById('panelHandle');
 
+    const AMINO_ACIDS = new Set([
+      'ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'HSD',
+      'HSE', 'HSP', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR',
+      'TRP', 'TYR', 'VAL'
+    ]);
+
     let component = null;
+    let structureInfo = null;
     let panelCollapsed = false;
     let dragStartY = 0;
     let dragStartOffset = 0;
     let currentOffset = 0;
+
+    function copyAtom(atom) {
+      return {
+        index: atom.index,
+        atomname: String(atom.atomname || '').trim().toUpperCase(),
+        resname: String(atom.resname || '').trim().toUpperCase(),
+        resno: atom.resno,
+        element: String(atom.element || '').trim().toUpperCase(),
+        x: atom.x,
+        y: atom.y,
+        z: atom.z
+      };
+    }
+
+    function centroid(atoms) {
+      if (!atoms.length) return null;
+      const total = atoms.reduce((sum, atom) => {
+        sum.x += atom.x;
+        sum.y += atom.y;
+        sum.z += atom.z;
+        return sum;
+      }, { x: 0, y: 0, z: 0 });
+
+      return {
+        x: total.x / atoms.length,
+        y: total.y / atoms.length,
+        z: total.z / atoms.length
+      };
+    }
+
+    function nearestAtom(atoms, point) {
+      if (!atoms.length || !point) return null;
+      let nearest = atoms[0];
+      let best = Infinity;
+
+      atoms.forEach((atom) => {
+        const dx = atom.x - point.x;
+        const dy = atom.y - point.y;
+        const dz = atom.z - point.z;
+        const d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 < best) {
+          best = d2;
+          nearest = atom;
+        }
+      });
+
+      return nearest;
+    }
+
+    function atomDistance(a, b) {
+      if (!a || !b) return NaN;
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const dz = a.z - b.z;
+      return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    function atomAngleDegrees(a, b, c) {
+      if (!a || !b || !c) return NaN;
+      const v1 = [a.x - b.x, a.y - b.y, a.z - b.z];
+      const v2 = [c.x - b.x, c.y - b.y, c.z - b.z];
+      const dot = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+      const mag1 = Math.hypot(v1[0], v1[1], v1[2]);
+      const mag2 = Math.hypot(v2[0], v2[1], v2[2]);
+      const cosine = Math.max(-1, Math.min(1, dot / (mag1 * mag2)));
+      return Math.acos(cosine) * 180 / Math.PI;
+    }
+
+    function inspectStructure() {
+      const info = {
+        helices: [[], [], [], []],
+        guanosineAtoms: [],
+        hemeAtoms: [],
+        fe: null,
+        hisNE2: [],
+        potassium: null
+      };
+
+      let peptideIndex = -1;
+
+      component.structure.eachAtom((atomProxy) => {
+        const atom = copyAtom(atomProxy);
+
+        // The coordinate file is ordered PEPA -> PEPB -> PEPC -> PEPD.
+        // Each peptide block starts with its GS2 residue, so this remains
+        // robust even when the PDB chain-ID field is blank.
+        if (atom.resname === 'GS2' && atom.resno === 1 && atom.atomname === 'N9') {
+          peptideIndex += 1;
+        }
+
+        if (atom.resname === 'GS2') info.guanosineAtoms.push(atom);
+        if (atom.resname === 'HEME') info.hemeAtoms.push(atom);
+
+        if (atom.resname === 'HEME' && atom.atomname === 'FE') {
+          info.fe = atom;
+        }
+
+        if ((atom.resname === 'HIS' || atom.resname === 'HSD' || atom.resname === 'HSE') && atom.atomname === 'NE2') {
+          info.hisNE2.push(atom);
+        }
+
+        if (AMINO_ACIDS.has(atom.resname) && atom.atomname === 'CA' && peptideIndex >= 0 && peptideIndex < 4) {
+          info.helices[peptideIndex].push(atom);
+        }
+
+        const isNamedStructuralK = atom.resname === 'KQRT' || atom.resname === 'K';
+        if (!info.potassium && (isNamedStructuralK || atom.element === 'K' || atom.atomname === 'K')) {
+          info.potassium = atom;
+        }
+      });
+
+      info.hisNE2.sort((a, b) => a.index - b.index);
+      info.guanosineAnchor = nearestAtom(info.guanosineAtoms, centroid(info.guanosineAtoms));
+      info.hemeAnchor = info.fe || nearestAtom(info.hemeAtoms, centroid(info.hemeAtoms));
+
+      return info;
+    }
 
     function setActive(button) {
       atomicBtn.classList.remove('active');
@@ -257,38 +465,210 @@
       button.classList.add('active');
     }
 
+    function add3DLabel(atom, text, color, yOffset = 0) {
+      if (!atom) return;
+
+      component.addRepresentation('label', {
+        sele: `@${atom.index}`,
+        labelType: 'text',
+        labelText: [text],
+        color,
+        radiusType: 'size',
+        radiusSize: 1.05,
+        fixedSize: true,
+        fontFamily: 'sans-serif',
+        fontWeight: 'bold',
+        showBackground: true,
+        backgroundColor: '#071019',
+        backgroundOpacity: 0.84,
+        backgroundMargin: 0.55,
+        showBorder: true,
+        borderColor: color,
+        borderWidth: 0.08,
+        attachment: 'middle-center',
+        yOffset,
+        zOffset: 2.5,
+        opacity: 1.0
+      });
+    }
+
+    function updateMeasurementPanel() {
+      if (!structureInfo || !structureInfo.fe || structureInfo.hisNE2.length < 2) {
+        measurementPanel.innerHTML = `
+          <div class="measureEyebrow">Structural geometry</div>
+          <div class="measureTitle">Secondary-structure annotations</div>
+          <div class="measureNote">The coordinate file does not contain the full atom set required for axial Fe–His measurements.</div>
+        `;
+        return;
+      }
+
+      const hisA = structureInfo.hisNE2[0];
+      const hisC = structureInfo.hisNE2[1];
+      const dA = atomDistance(structureInfo.fe, hisA);
+      const dC = atomDistance(structureInfo.fe, hisC);
+      const angle = atomAngleDegrees(hisA, structureInfo.fe, hisC);
+
+      measurementPanel.innerHTML = `
+        <div class="measureEyebrow">Structural geometry</div>
+        <div class="measureTitle">Axial heme coordination</div>
+        <div class="measureRow"><span>Fe–His A (NE2)</span><strong>${dA.toFixed(2)} Å</strong></div>
+        <div class="measureRow"><span>Fe–His C (NE2)</span><strong>${dC.toFixed(2)} Å</strong></div>
+        <div class="measureRow"><span>His–Fe–His angle</span><strong>${angle.toFixed(1)}°</strong></div>
+        <div class="measureNote">Values are calculated directly from the coordinates currently displayed.</div>
+      `;
+    }
+
     function showAtomicDetail() {
       if (!component) return;
+
       component.removeAllRepresentations();
+      measurementPanel.classList.remove('visible');
+
+      // Keep the original full atomistic representation unchanged.
       component.addRepresentation('ball+stick', {
         sele: 'all',
         colorScheme: 'element',
         multipleBond: 'symmetric',
         radiusScale: 0.42,
         aspectRatio: 2.0,
-        bondSpacing: 0.75
+        bondSpacing: 0.75,
+        quality: 'high'
       });
-      component.autoView();
+
+      component.autoView(700);
       setActive(atomicBtn);
     }
 
     function showSecondaryStructure() {
       if (!component) return;
+      if (!structureInfo) structureInfo = inspectStructure();
+
       component.removeAllRepresentations();
+
+      // Four peptide helices: clean cartoon representation.
       component.addRepresentation('cartoon', {
         sele: 'protein',
-        color: '#008b8b',
-        smoothSheet: true
+        color: '#18c8d0',
+        smoothSheet: true,
+        quality: 'high',
+        scale: 1.15
       });
+
+      // Preserve chemically meaningful atomic detail for the guanosine-PEG2 cap.
       component.addRepresentation('ball+stick', {
-        sele: 'not protein',
+        sele: 'GS2',
         colorScheme: 'element',
         multipleBond: 'symmetric',
-        radiusScale: 0.42,
-        aspectRatio: 2.0,
-        bondSpacing: 0.75
+        radiusScale: 0.34,
+        aspectRatio: 2.15,
+        bondSpacing: 0.72,
+        quality: 'high'
       });
-      component.autoView();
+
+      // Heme remains atomistic so the porphyrin and Fe center stay interpretable.
+      component.addRepresentation('ball+stick', {
+        sele: 'HEME',
+        colorScheme: 'element',
+        multipleBond: 'symmetric',
+        radiusScale: 0.40,
+        aspectRatio: 2.1,
+        bondSpacing: 0.72,
+        quality: 'high'
+      });
+
+      // Show the two coordinating histidine side chains explicitly on top of the cartoon.
+      component.addRepresentation('ball+stick', {
+        sele: '(HIS or HSD or HSE) and 9',
+        colorScheme: 'element',
+        radiusScale: 0.34,
+        aspectRatio: 2.0,
+        quality: 'high'
+      });
+
+      // If a structural potassium is present in a later coordinate revision, it is
+      // automatically emphasized without changing the atomic-detail view.
+      if (structureInfo.potassium) {
+        component.addRepresentation('spacefill', {
+          sele: `@${structureInfo.potassium.index}`,
+          color: '#b79cff',
+          scale: 0.72,
+          quality: 'high'
+        });
+      }
+
+      // Major 3D structural labels. Attach to representative atoms so labels rotate
+      // naturally with the model rather than behaving like a flat screen overlay.
+      const helixNames = ['Peptide A', 'Peptide B', 'Peptide C', 'Peptide D'];
+      structureInfo.helices.forEach((atoms, i) => {
+        if (!atoms.length) return;
+        const positionFraction = [0.38, 0.54, 0.62, 0.46][i];
+        const anchor = atoms[Math.min(atoms.length - 1, Math.round((atoms.length - 1) * positionFraction))];
+        add3DLabel(anchor, helixNames[i], '#b8f6f7', i % 2 === 0 ? 0.55 : -0.55);
+      });
+
+      add3DLabel(structureInfo.guanosineAnchor, 'Guanosine–PEG2 cap', '#9dc9ff', 0.55);
+      add3DLabel(structureInfo.hemeAnchor, 'Heme cofactor · Fe center', '#ffd166', -0.65);
+
+      if (structureInfo.potassium) {
+        add3DLabel(structureInfo.potassium, 'Structural K⁺', '#c8b8ff', 0.5);
+      }
+
+      // Quantitative axial coordination: two Fe–His bond distances and the
+      // His–Fe–His angle. NGL renders these as true 3D measurements.
+      if (structureInfo.fe && structureInfo.hisNE2.length >= 2) {
+        const hisA = structureInfo.hisNE2[0];
+        const hisC = structureInfo.hisNE2[1];
+
+        component.addRepresentation('distance', {
+          atomPair: [
+            [structureInfo.fe.index, hisA.index],
+            [structureInfo.fe.index, hisC.index]
+          ],
+          color: '#ffd166',
+          labelColor: '#ffe7a1',
+          labelSize: 1.0,
+          labelVisible: true,
+          labelUnit: 'angstrom',
+          labelBackground: true,
+          labelBackgroundColor: '#090c11',
+          labelBackgroundOpacity: 0.88,
+          labelBackgroundMargin: 0.45,
+          labelBorder: true,
+          labelBorderColor: '#8a6a27',
+          labelBorderWidth: 0.08,
+          labelFixedSize: true,
+          labelZOffset: 2.2,
+          radiusScale: 0.65,
+          opacity: 0.95
+        });
+
+        component.addRepresentation('angle', {
+          atomTriple: [[hisA.index, structureInfo.fe.index, hisC.index]],
+          color: '#7ddcff',
+          labelColor: '#aeeaff',
+          labelSize: 1.0,
+          labelVisible: true,
+          labelBackground: true,
+          labelBackgroundColor: '#090c11',
+          labelBackgroundOpacity: 0.88,
+          labelBackgroundMargin: 0.45,
+          labelBorder: true,
+          labelBorderColor: '#2a6d84',
+          labelBorderWidth: 0.08,
+          labelFixedSize: true,
+          labelZOffset: 2.4,
+          vectorVisible: true,
+          arcVisible: true,
+          sectorVisible: false,
+          lineOpacity: 0.9,
+          linewidth: 2
+        });
+      }
+
+      updateMeasurementPanel();
+      measurementPanel.classList.add('visible');
+
+      component.autoView(700);
       setActive(secondaryBtn);
     }
 
@@ -354,6 +734,7 @@
     stage.loadFile('guanosine_capped_four_helix_bundle_heme.pdb', { ext: 'pdb' })
       .then((loadedComponent) => {
         component = loadedComponent;
+        structureInfo = inspectStructure();
         showAtomicDetail();
         statusEl.textContent = 'Interactive model loaded. Drag to rotate. Scroll or pinch to zoom.';
         setTimeout(() => {
